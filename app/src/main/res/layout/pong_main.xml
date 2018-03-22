@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/layoutRoot"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical">
+
+    <harrison.pong.AnimationSurface
+        android:id="@+id/animationSurface"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="12"></harrison.pong.AnimationSurface>
+
+    <LinearLayout
+        android:id="@+id/layoutControls"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@android:color/background_dark"
+        android:orientation="horizontal">
+
+        <RadioGroup
+            android:id="@+id/radioGroupSpeed"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:defaultFocusHighlightEnabled="false"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radioButtonSlow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Slow"
+                android:textColor="@android:color/background_light"
+                android:textColorLink="@color/colorBallBlue"
+                android:textSize="12sp"
+                app:buttonTint="@color/colorBallBlue" />
+
+                <!--
+                External Citation
+                Date: 3/19/2018
+                Problem: how to change color of radio buttons
+                Resource: https://stackoverflow.com/questions/17120199/
+                change-circle-color-of-radio-button-android
+                Solution: use buttonTint
+                -->
+
+            <RadioButton
+                android:id="@+id/radioButtonNormal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Normal"
+                android:textColor="@android:color/background_light"
+                android:textColorLink="@color/colorBallBlue"
+                android:textSize="12sp"
+                app:buttonTint="@color/colorBallBlue" />
+
+            <RadioButton
+                android:id="@+id/radioButtonFast"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Fast"
+                android:textColor="@android:color/background_light"
+                android:textColorLink="@color/colorBallBlue"
+                android:textSize="12sp"
+                app:buttonTint="@color/colorBallBlue" />
+        </RadioGroup>
+
+        <Button
+            android:id="@+id/buttonStart"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Start!"
+            android:textSize="20sp" />
+
+        <LinearLayout
+            android:id="@+id/layoutPaddleSize"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/textViewPaddleSizeLabel"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="Paddle Size:"
+                android:textColor="@android:color/background_light"
+                android:textSize="14sp" />
+
+            <SeekBar
+                android:id="@+id/seekBarPaddleSize"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:progressTint="@color/colorPaddleRed"
+                android:thumbTint="@color/colorPaddleRed" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>
