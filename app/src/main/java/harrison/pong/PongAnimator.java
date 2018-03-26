@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.widget.ArrayAdapter;
 
 /**
  * Class PongAnimator
@@ -23,6 +24,8 @@ public class PongAnimator implements Animator{
     private static final int TOP = 1;
     private static final int RIGHT = 2;
     private static final int PADDLE = 3;
+
+    private Brick[] bricks;
 
     private final Paddle paddle; //just a reference to the paddle in walls[PADDLE]
     private Ball ball;
@@ -66,6 +69,8 @@ public class PongAnimator implements Animator{
 
         walls[PADDLE] = paddle;
 
+        initBricks(); //creates bricks
+
         ball = new Ball(paddle.getCenterX(),paddle.getTop()-ballRad,
                         ballRad,0,0,0xff0000ff);
 
@@ -79,6 +84,11 @@ public class PongAnimator implements Animator{
             wall.onDraw(c);
         }
 
+        //draws bricks
+        for (Brick brick : bricks) {
+            if (brick == null) continue;
+            brick.onDraw(c);
+        }
         drawBoundary(c);
         drawScore(c);
         ball.onDraw(c);
@@ -126,6 +136,68 @@ public class PongAnimator implements Animator{
         return true;
     }
 
+    /**
+     *
+     */
+    private void initBricks () {
+        bricks = new Brick[18];
+
+        int w= screenWidth/8;
+        int h= screenHeight/9;
+        int x= screenWidth/2 - 3*w;
+        int y= 100;
+
+        int index= 0;
+
+        for (int i=0; i<4; i++) {
+            int hits= 0;
+            switch(i){
+                case 0:
+                case 3:
+                    hits= 3;
+                    break;
+                case 1:
+                    hits= 2;
+                    break;
+                case 2:
+                    hits= 1;
+                    break;
+            }
+
+            int bricksInRow= 6-i;
+
+            initBrickRow(x+i*w/2, y+i*h, w, h, bricksInRow, hits, index);
+
+            //increment where row should start
+            index+= bricksInRow;
+        }
+    }
+
+    /**
+     * initializes a row of bricks
+     *
+     * @param x left-coord of this row
+     * @param y top-coord of this row
+     * @param width of each brick
+     * @param height of each brick
+     * @param numBricks number of bricks in row
+     * @param hits to initialize bricks with
+     * @param index starting index in brick array that this row is initializing
+     */
+    private void initBrickRow (int x, int y, int width, int height,
+                               int numBricks, int hits, int index) {
+
+        //bottom of bricks all the same
+        int bottom = y+height;
+
+        for (int i=0; i<numBricks; i++) {
+            int left = x+i*width;
+            int right = left+width;
+
+            bricks[index+i] = new Brick(left,y,right,bottom,hits);
+        }
+    }
+
     @Override
     public int interval() {
         return tickInterval; //how many millis between ticks
@@ -160,6 +232,12 @@ public class PongAnimator implements Animator{
 
             if (hitWall == paddle) score++;
 
+            for (int i=0; i<bricks.length; i++) {
+                if (bricks[i] == null) continue;
+                if (bricks[i].ifBreak()) {
+                    bricks[i] = null; //deletes brick from array
+                }
+            }
             //if ball was out of bounds, restart ball in playing position
             if (!ballInBounds()) restartBall();
         }
@@ -188,6 +266,15 @@ public class PongAnimator implements Animator{
                 //we have found the wall the ball is touching
                 //so return which side of the wall the ball hit
                 return currWall;
+            }
+        }
+
+        //checks if ball hits any brick
+        for (Brick brick : bricks) {
+            if (brick == null) continue;
+            if (brick.isPointWithin(ballX,ballY,ballRad)) {
+                brick.hit();
+                return brick;
             }
         }
 

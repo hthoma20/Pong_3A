@@ -123,4 +123,8 @@ public class Wall {
     public int getBottom() {
         return bottom;
     }
+
+    protected void setColor (int color) {
+        this.paint.setColor(color);
+    }
 }

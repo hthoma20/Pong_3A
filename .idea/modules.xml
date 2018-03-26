@@ -4,6 +4,8 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Pong2.iml" filepath="$PROJECT_DIR$/Pong2.iml" />
       <module fileurl="file://$PROJECT_DIR$/Pong2-b44d167e29a4eb1f52337b62ad633a08cf4bea97.iml" filepath="$PROJECT_DIR$/Pong2-b44d167e29a4eb1f52337b62ad633a08cf4bea97.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Pong_3A.iml" filepath="$PROJECT_DIR$/Pong_3A.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
