@@ -1,6 +1,8 @@
 package harrison.pong;
 
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 
 /**
  * Class Brick
@@ -14,6 +16,7 @@ public class Brick extends Wall {
 
     //number of hits remaining until brick breaks
     private int remainingHits;
+    private Paint outlinePaint = new Paint();
 
     private static final int WHITE = Color.rgb(255,255,255); //error color
     private static final int RED = Color.rgb(255,0,0); //error color
@@ -36,8 +39,27 @@ public class Brick extends Wall {
      */
     public Brick(int left, int top, int right, int bottom, int hits) {
         super(left, top, right, bottom, RED);
+        initBrickOutlinePaint();
         this.remainingHits = hits;
         setColor();
+    }
+
+    /**
+     * draws wall onDraw + outline of bricks
+     *
+     * @param c canvas on which to draw
+     */
+    @Override
+    public void onDraw (Canvas c) {
+        super.onDraw(c);
+        c.drawRect(left,top,right,bottom,outlinePaint);
+    }
+
+
+    private void initBrickOutlinePaint () {
+        outlinePaint.setColor(0xff000000); //black outline of each brick
+        outlinePaint.setStrokeWidth(10.0f);
+        outlinePaint.setStyle(Paint.Style.STROKE);
     }
 
     /**

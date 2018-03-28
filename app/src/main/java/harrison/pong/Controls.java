@@ -3,6 +3,7 @@ package harrison.pong;
 
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 
@@ -19,28 +20,44 @@ import android.widget.SeekBar;
 
 public class Controls implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
 
-    PongAnimator pong;
-    Button startButton;
-    SeekBar paddleSeekBar;
-    RadioGroup speedRadioGroup;
+    private PongAnimator pong;
+    private Button startButton;
+    private Button addBallButton;
+    private SeekBar paddleSeekBar;
+    private RadioGroup speedRadioGroup;
 
-    int minPaddle= 100;
-    int maxPaddle= 700;
+    private LinearLayout gameOver;
+    private Button closeMessageButton;
+
+    //range of size of paddle
+    private int minPaddle= 100;
+    private int maxPaddle= 700;
+
+    //range of speed of ball
+    private int minSpeed= -1;
+    private int maxSpeed= -1;
 
     /**
      * controls constructor
      *
      * @param pong
      * @param start
+     * @param addBall
      * @param paddleSize
      * @param speedRadioGroup
+     * @param gameOver linear layout of game over display
+     * @param closeMessageButton button to close message
      */
-    public Controls (PongAnimator pong, Button start,
-                     SeekBar paddleSize, RadioGroup speedRadioGroup) {
+    public Controls (PongAnimator pong, Button start,Button addBall,
+                     SeekBar paddleSize, RadioGroup speedRadioGroup,
+                     LinearLayout gameOver, Button closeMessageButton) {
         this.pong = pong;
         this.startButton = start;
+        this.addBallButton = addBall;
         this.paddleSeekBar = paddleSize;
         this.speedRadioGroup = speedRadioGroup;
+        this.gameOver = gameOver;
+        this.closeMessageButton= closeMessageButton;
 
         pong.setControls(this);
         initViews();
@@ -62,33 +79,42 @@ public class Controls implements View.OnClickListener, SeekBar.OnSeekBarChangeLi
      */
     private void initListener () {
         startButton.setOnClickListener (this);
+        addBallButton.setOnClickListener(this);
         paddleSeekBar.setOnSeekBarChangeListener(this);
 
+        closeMessageButton.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
         if (view == startButton) {
-            //the radio button selected
-            int checkedID = speedRadioGroup.getCheckedRadioButtonId();
-            int minSpeed = -1;
-            int maxSpeed = -1;
-
-            if (checkedID == R.id.radioButtonSlow) {
-                minSpeed = 2000;
-                maxSpeed = 3000;
-            }
-            else if (checkedID == R.id.radioButtonNormal) {
-                minSpeed = 4000;
-                maxSpeed = 5000;
-            }
-            else if (checkedID == R.id.radioButtonFast) {
-                minSpeed = 6000;
-                maxSpeed = 7000;
-            }
-
+            findSpeeds();
             startButton.setText("STOP!"); //changes text on button
             pong.startGame(minSpeed, maxSpeed);
+        }
+        else if (view == addBallButton) {
+            findSpeeds();
+            pong.addBall(minSpeed, maxSpeed);
+        }
+        else if(view == closeMessageButton){
+            gameOver.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    public void findSpeeds () {
+        int checkedID = speedRadioGroup.getCheckedRadioButtonId();
+
+        if (checkedID == R.id.radioButtonSlow) {
+            minSpeed = 2000;
+            maxSpeed = 3000;
+        }
+        else if (checkedID == R.id.radioButtonNormal) {
+            minSpeed = 4000;
+            maxSpeed = 5000;
+        }
+        else if (checkedID == R.id.radioButtonFast) {
+            minSpeed = 6000;
+            maxSpeed = 7000;
         }
     }
 
@@ -99,6 +125,13 @@ public class Controls implements View.OnClickListener, SeekBar.OnSeekBarChangeLi
         startButton.setText("START!");
         pong.changePaddleSize(paddleSize());
 
+    }
+
+    /**
+     * enables popup message if no more lives for player to play
+     */
+    public void gameOver (){
+        gameOver.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -124,7 +157,9 @@ public class Controls implements View.OnClickListener, SeekBar.OnSeekBarChangeLi
 
     //unused methods
     @Override
-    public void onStartTrackingTouch(SeekBar seekBar){}
+    public void onStartTrackingTouch(SeekBar seekBar){
+        gameOver();
+    }
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {}
 }

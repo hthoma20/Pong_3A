@@ -18,7 +18,7 @@ import android.widget.SeekBar;
  * This is the activity for the Pong game. It attaches a PongAnimator to
  * an AnimationSurface.
  *
- * Update: Created a working program of Pong.
+ * 3A Update: Created a working program of Pong.
  * Ball starts in stationary position on paddle. User is able to drag the
  * paddle to where they want to start, and hit the start button when they
  * are ready, which will launch ball at a random speed and direction.
@@ -26,6 +26,8 @@ import android.widget.SeekBar;
  * selecting the speed of the ball. When ball hits a wall or paddle, ball
  * will bounce off the wall. Game will end and ball will restart when
  * ball either goes out of bounds or player presses "STOP!" button.
+ *
+ * 3B Update:
  *
  * Instructions:
  * Landscape orientation
@@ -53,12 +55,20 @@ public class PongMainActivity extends AppCompatActivity {
         PongAnimator pong = new PongAnimator();
         mySurface.setAnimator(pong);
 
-        Button startButton= (Button)findViewById(R.id.buttonStart);
-        SeekBar paddleSizeBar= (SeekBar)findViewById(R.id.seekBarPaddleSize);
-        RadioGroup ballSpeedRadio= (RadioGroup)findViewById(R.id.radioGroupSpeed);
+        Button startButton=
+                (Button)findViewById(R.id.buttonStart);
+        Button addBallButton=
+                (Button)findViewById(R.id.buttonAddBall);
+        SeekBar paddleSizeBar=
+                (SeekBar)findViewById(R.id.seekBarPaddleSize);
+        RadioGroup ballSpeedRadio=
+                (RadioGroup)findViewById(R.id.radioGroupSpeed);
+        LinearLayout gameOver =
+                (LinearLayout)findViewById(R.id.layoutGameOverMessage);
+        Button closeMessageButton= (Button)findViewById(R.id.buttonCloseMessage);
 
         Controls control =
-                new Controls(pong,startButton,
-                            paddleSizeBar,ballSpeedRadio);
+                new Controls(pong,startButton,addBallButton,paddleSizeBar,
+                        ballSpeedRadio, gameOver,closeMessageButton);
     }
 }

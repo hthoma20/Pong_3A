@@ -6,11 +6,56 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <harrison.pong.AnimationSurface
-        android:id="@+id/animationSurface"
+    <FrameLayout
+        android:id="@+id/layoutGameSurface"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="12"></harrison.pong.AnimationSurface>
+        android:layout_weight="12">
+
+        <harrison.pong.AnimationSurface
+            android:id="@+id/animationSurface"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible"></harrison.pong.AnimationSurface>
+
+        <LinearLayout
+            android:id="@+id/layoutGameOverMessage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="invisible">
+            <!--
+                External Citation
+                Date: 3/27/2018
+                Problem: how to pop-up a message
+                Resource: https://developer.android.com/reference/android/view/
+                View.html#setVisibility(int); https://stackoverflow.com/
+                questions/7519160/android-overlay-a-view-ontop-of-everything?
+                utm_medium=organic&utm_source=google_rich_qa&utm_campaign=
+                google_rich_qa
+                Solution: use FrameLayout and visibility attributes to program
+                    when message pops up
+                -->
+
+            <TextView
+                android:id="@+id/textViewGameOver"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Game Over!"
+                android:textColor="@color/colorPaddleRed"
+                android:textSize="50sp" />
+
+            <Button
+                android:id="@+id/buttonCloseMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="close" />
+
+        </LinearLayout>
+
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/layoutControls"
@@ -78,6 +123,14 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:text="Start!"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/buttonAddBall"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="0"
+            android:text="Ball++"
             android:textSize="20sp" />
 
         <LinearLayout
