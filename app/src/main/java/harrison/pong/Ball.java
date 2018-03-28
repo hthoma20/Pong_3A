@@ -80,11 +80,7 @@ public class Ball {
      * @param c canvas on which to draw
      */
     public void onDraw (Canvas c){
-
         c.drawCircle((float)x,(float)y,radius,paint);
-        Paint dotPaint= new Paint();
-        dotPaint.setColor(0xff000000);
-        c.drawCircle((float)x,(float)y,3,dotPaint);
     }
 
     /**
@@ -142,6 +138,34 @@ public class Ball {
     public void incrementDirection(double deltaTheta) {
         this.direction += deltaTheta;
         angleDirection();
+    }
+
+    /**
+     * bounces two balls off each other
+     * @param other the other ball to bounce
+     */
+    public void bounceOff(Ball other){
+        //switch speed and direction
+
+        int tempSpd= this.speed;
+        this.speed= other.speed;
+        other.speed= tempSpd;
+
+        double tempDir= this.direction;
+        this.direction= other.direction;
+        other.direction= tempDir;
+    }
+
+    /**
+     *
+     * @param other the ball in question
+     * @return whether this ball is in contact with other
+     */
+    public boolean touches(Ball other){
+        double dist=
+                Math.sqrt((this.x-other.x)*(this.x-other.x) +
+                        (this.y-other.y)*(this.y-other.y));
+        return dist <= this.radius + other.radius;
     }
 
     /**

@@ -246,6 +246,7 @@ public class PongAnimator implements Animator{
         //if ball not in play, we don't need to do anything
         if(ballInPlay) {
 
+            //check ball stuff
             for(Ball ball : balls) {
                 ball.move(tickInterval);
 
@@ -254,6 +255,19 @@ public class PongAnimator implements Animator{
                 //if we hit a wall, bounce the ball
                 if (hitWall != null) bounceBall(ball,hitWall);
             }
+
+            for(int i=0; i < balls.size(); i++){
+                Ball firstBall= balls.get(i);
+                for(int j=i+1; j<balls.size(); j++){
+                    Ball secondBall= balls.get(j);
+
+                    if(firstBall.touches(secondBall)){
+                        firstBall.bounceOff(secondBall);
+                    }
+                }
+            }
+
+            //check brick stuff
             for (int i=0; i<bricks.length; i++) {
                 if (bricks[i] == null) continue;
                 if (bricks[i].ifBreak()) {
@@ -473,8 +487,13 @@ public class PongAnimator implements Animator{
         double maxDir = 5*Math.PI/6;
         double dir = Math.random()*(maxDir-minDir)+minDir;
 
+        int r= (int)(Math.random()*256);
+        int g= (int)(Math.random()*256);
+        int b= (int)(Math.random()*256);
+        int ballColor= Color.rgb(r,g,b);
+
         balls.add(new Ball(paddle.getCenterX(),paddle.getTop()-ballRad,ballRad,
-                spd,dir,0xff0000ff));
+                spd,dir,ballColor));
     }
 
     @Override
