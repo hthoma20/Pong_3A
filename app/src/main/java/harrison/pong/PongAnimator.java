@@ -28,21 +28,27 @@ public class PongAnimator implements Animator{
     private static final int RIGHT = 2;
     private static final int PADDLE = 3;
 
+    //the array of bricks for brick breaker
     private Brick[] bricks;
 
-    private final Paddle paddle; //just a reference to the paddle in walls[PADDLE]
+    private Paddle paddle; //just a reference to the paddle in walls[PADDLE]
+    //all balls in play
     private ArrayList<Ball> balls= new ArrayList<>();
 
     //whether ball is in play
     private boolean ballInPlay;
+    //whether the game is over
+    private boolean gameOver;
 
+    //screen dimensions
     private int screenWidth;
     private int screenHeight;
     private int wallWidth;
     private int ballRad= 45;
 
     private int score; //number of times ball hits paddle
-    private int livesRemaining = 3; //initial amount of lives given
+    private int livesRemaining; //initial amount of lives given
+    private int bricksRemaining;
 
     private int tickInterval = 7;
 
@@ -56,6 +62,15 @@ public class PongAnimator implements Animator{
         screenWidth = 2550;
         screenHeight = 1300;
         wallWidth = screenHeight/20;
+
+        startNewGame();
+    }
+
+    /**
+     * initializes all things nessesary to start a new game
+     */
+    public void startNewGame(){
+        balls.clear();
 
         int wallColor = 0xff555555;
 
@@ -74,16 +89,25 @@ public class PongAnimator implements Animator{
 
         walls[PADDLE] = paddle;
 
+
         initBricks(); //creates bricks
 
         balls.add( new Ball(paddle.getCenterX(),paddle.getTop()-ballRad,
-                        ballRad,0,0,0xff0000ff) );
+                ballRad,0,0,0xff0000ff) );
 
         ballInPlay = false;
+        gameOver= false;
+        if(control != null) control.gameBegin();
         score= 0;
+        livesRemaining= 3;
     }
 
+    /**
+     * draws all relevant things
+     * @param c the canvas on which to draw
+     */
     public void onDraw (Canvas c){
+
         //draw walls
         for (Wall wall : walls) {
             wall.onDraw(c);
@@ -102,6 +126,39 @@ public class PongAnimator implements Animator{
         }
     }
 
+    /**
+     * draws the game over message
+     * @param c the canvas on which to draw the message
+     */
+    private void drawGameOverMessage(Canvas c){
+        int textSize= screenHeight/13;
+
+        Paint gameOverPaint= new Paint();
+        gameOverPaint.setColor(0xffffffff);
+        gameOverPaint.setTextSize(textSize);
+        gameOverPaint.setTextAlign(Paint.Align.CENTER);
+
+        c.drawText("Game Over",screenWidth/2,screenHeight/2,gameOverPaint);
+
+        if(bricksRemaining < 1){ //if the player won
+            //display win message and score
+            c.drawText("You won with score:",
+                    screenWidth/2,screenHeight/2+textSize,gameOverPaint);
+            //final score is calculated as number of bricks consequtively destroyed
+            //times a life remaining multiplier
+            c.drawText(score+" X "+livesRemaining+" = "+score*livesRemaining,
+                    screenWidth/2,screenHeight/2+2*textSize,gameOverPaint);
+        }
+        else if(livesRemaining < 1){ //if the player lost
+            c.drawText("You lost",
+                    screenWidth/2,screenHeight/2+textSize,gameOverPaint);
+        }
+    }
+
+    /**
+     * draws the out of bounds line for balls
+     * @param c the canvas on which to draw
+     */
     private void drawBoundary (Canvas c) {
         Paint boundaryPaint = new Paint ();
         boundaryPaint.setColor(0xffffffff);
@@ -128,8 +185,9 @@ public class PongAnimator implements Animator{
 
         scorePaint.setColor(Color.rgb(0,0,255));//sets ball color
 
-        int livesRad = 25; //radius of balls representing lives remaining
-        //for every ball to represent lives drawn
+        //radius of balls representing lives remaining
+        int livesRad = screenWidth/102;
+        //draw number of balls to represent lifes remaining
         for (int i=0; i< livesRemaining; i++) {
             c.drawCircle(i*7*livesRad/3+2*wallWidth,2*(wallWidth+livesRad),
                     livesRad,scorePaint);
@@ -161,6 +219,7 @@ public class PongAnimator implements Animator{
      */
     private void initBricks () {
         bricks = new Brick[18];
+        bricksRemaining= 18;
 
         //size of each brick
         int w= screenWidth/8;
@@ -226,16 +285,19 @@ public class PongAnimator implements Animator{
         return tickInterval; //how many millis between ticks
     }
 
+    //background always black
     @Override
     public int backgroundColor() {
         return 0xff000000;
     }
 
+    //never pause
     @Override
     public boolean doPause() {
         return false;
     }
 
+    //never quit
     @Override
     public boolean doQuit() {
         return false;
@@ -243,38 +305,20 @@ public class PongAnimator implements Animator{
 
     @Override
     public void tick(Canvas canvas) {
+        //if the game is over
+        if(gameOver){
+            //draw gameover message
+            drawGameOverMessage(canvas);
+            //and do nothing else
+            return;
+        }
+
         //if ball not in play, we don't need to do anything
         if(ballInPlay) {
 
-            //check ball stuff
-            for(Ball ball : balls) {
-                ball.move(tickInterval);
+            ballMovement();
 
-                //check for collision with a wall
-                Wall hitWall = checkCollision(ball);
-                //if we hit a wall, bounce the ball
-                if (hitWall != null) bounceBall(ball,hitWall);
-            }
-
-            for(int i=0; i < balls.size(); i++){
-                Ball firstBall= balls.get(i);
-                for(int j=i+1; j<balls.size(); j++){
-                    Ball secondBall= balls.get(j);
-
-                    if(firstBall.touches(secondBall)){
-                        firstBall.bounceOff(secondBall);
-                    }
-                }
-            }
-
-            //check brick stuff
-            for (int i=0; i<bricks.length; i++) {
-                if (bricks[i] == null) continue;
-                if (bricks[i].ifBreak()) {
-                    bricks[i] = null; //deletes brick from array
-                    score++;
-                }
-            }
+            removeBrokenBricks();
 
             //if there are no balls in bounds
             if (!ballInBounds()) {
@@ -283,17 +327,70 @@ public class PongAnimator implements Animator{
                 restartBall();
                 //they lose a life
                 livesRemaining--;
+            }
 
-                //if they have no lives remaining
-                if (livesRemaining < 1) { //if game should be over
-                    //control.gameOver();
-                    //todo why can't we call this from a different thread
-                }
+            //check if game over
+            if (livesRemaining < 1 || bricksRemaining < 1) { //if game should be over
+                gameOver= true;
+                control.gameOver();
             }
 
         }
 
         onDraw(canvas);
+    }
+
+    /**
+     * does ball movement such as
+     * moving balls and
+     * checking for bounces
+     */
+    private void ballMovement(){
+
+        for(Ball ball : balls) {
+            //move each ball
+            ball.move(tickInterval);
+
+            //check for collision with a wall
+            Wall hitWall = checkCollision(ball);
+
+            boolean didBounce= false;
+            //if we hit a wall, bounce the ball
+            if (hitWall != null){
+                didBounce= bounceBall(ball,hitWall);
+            }
+
+            //if we hit a brick
+            if(hitWall instanceof Brick && didBounce){
+                ((Brick)hitWall).hit();
+            }
+        }
+
+        //check if any ball should bounce off any other
+        for(int i=0; i < balls.size(); i++){
+            Ball firstBall= balls.get(i);
+            for(int j=i+1; j<balls.size(); j++){
+                Ball secondBall= balls.get(j);
+
+                if(firstBall.touches(secondBall)){
+                    firstBall.bounceOff(secondBall);
+                }
+            }
+        }
+    }
+
+    /**
+     * removes all broken bricks from array
+     */
+    private void removeBrokenBricks(){
+        for (int i=0; i<bricks.length; i++) {
+            if (bricks[i] == null) continue;
+            if (bricks[i].ifBreak()) {
+                bricks[i] = null; //deletes brick from array
+                bricksRemaining--;
+                score++;
+            }
+        }
     }
 
     /**
@@ -325,7 +422,6 @@ public class PongAnimator implements Animator{
         for (Brick brick : bricks) {
             if (brick == null) continue;
             if (brick.isPointWithin(ballX,ballY,ballRad)) {
-                brick.hit();
                 return brick;
             }
         }
@@ -373,8 +469,10 @@ public class PongAnimator implements Animator{
      * bounces the ball off wall
      * @param ball the ball to bounce
      * @param wall the wall to bounce ball off of
+     *
+     * @return whether the ball bounced
      */
-    private void bounceBall(Ball ball, Wall wall){
+    private boolean bounceBall(Ball ball, Wall wall){
         //the side of the wall that was hit
         int wallSide= wall.sideClosestTo(
                 (int)ball.getX(),(int)ball.getY());
@@ -393,27 +491,33 @@ public class PongAnimator implements Animator{
                 //if ball is traveling east
                 if (quadDir == Ball.NE || quadDir == Ball.SE) {
                     ball.setDirection(Math.PI - ballDir);
+                    return true;
                 }
                 break;
             case Wall.TOPSIDE:
                 //if ball is traveling south
                 if (quadDir == Ball.SE || quadDir == Ball.SW) {
                     ball.setDirection(-ballDir);
+                    return true;
                 }
                 break;
             case Wall.RIGHTSIDE:
                 //if ball is traveling west
                 if (quadDir == Ball.NW || quadDir == Ball.SW) {
                     ball.setDirection(Math.PI-ballDir);
+                    return true;
                 }
                 break;
             case Wall.BOTTOMSIDE:
                 //if ball is traveling north
                 if (quadDir == Ball.NE || quadDir == Ball.NW) {
                     ball.setDirection(-ballDir);
+                    return true;
                 }
                 break;
         }
+
+        return false;
     }
 
     /**
@@ -440,7 +544,7 @@ public class PongAnimator implements Animator{
      *
      * @return whether the game was started (T) or restarted (F)
      */
-    public boolean startGame (int minSpeed, int maxSpeed) {
+    public boolean startOrResetBall(int minSpeed, int maxSpeed) {
         if (ballInPlay) {
             restartBall();
             return false;
@@ -487,11 +591,13 @@ public class PongAnimator implements Animator{
         double maxDir = 5*Math.PI/6;
         double dir = Math.random()*(maxDir-minDir)+minDir;
 
+        //find random color for new ball
         int r= (int)(Math.random()*256);
         int g= (int)(Math.random()*256);
         int b= (int)(Math.random()*256);
         int ballColor= Color.rgb(r,g,b);
 
+        //make new ball and add it
         balls.add(new Ball(paddle.getCenterX(),paddle.getTop()-ballRad,ballRad,
                 spd,dir,ballColor));
     }
@@ -513,7 +619,6 @@ public class PongAnimator implements Animator{
     public void movePaddle (int x) {
         paddle.setCenterX(x);
         checkPaddleToWall();
-
     }
 
     /**
@@ -557,5 +662,9 @@ public class PongAnimator implements Animator{
             balls.get(0).setX(paddle.getCenterX());
         }
         return true;
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
     }
 }

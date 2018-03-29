@@ -3,7 +3,6 @@ package harrison.pong;
 
 import android.view.View;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.SeekBar;
 
@@ -26,8 +25,7 @@ public class Controls implements View.OnClickListener, SeekBar.OnSeekBarChangeLi
     private SeekBar paddleSeekBar;
     private RadioGroup speedRadioGroup;
 
-    private LinearLayout gameOver;
-    private Button closeMessageButton;
+    private boolean pongGameInPlay;
 
     //range of size of paddle
     private int minPaddle= 100;
@@ -45,19 +43,14 @@ public class Controls implements View.OnClickListener, SeekBar.OnSeekBarChangeLi
      * @param addBall
      * @param paddleSize
      * @param speedRadioGroup
-     * @param gameOver linear layout of game over display
-     * @param closeMessageButton button to close message
      */
     public Controls (PongAnimator pong, Button start,Button addBall,
-                     SeekBar paddleSize, RadioGroup speedRadioGroup,
-                     LinearLayout gameOver, Button closeMessageButton) {
+                     SeekBar paddleSize, RadioGroup speedRadioGroup) {
         this.pong = pong;
         this.startButton = start;
         this.addBallButton = addBall;
         this.paddleSeekBar = paddleSize;
         this.speedRadioGroup = speedRadioGroup;
-        this.gameOver = gameOver;
-        this.closeMessageButton= closeMessageButton;
 
         pong.setControls(this);
         initViews();
@@ -81,26 +74,31 @@ public class Controls implements View.OnClickListener, SeekBar.OnSeekBarChangeLi
         startButton.setOnClickListener (this);
         addBallButton.setOnClickListener(this);
         paddleSeekBar.setOnSeekBarChangeListener(this);
-
-        closeMessageButton.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View view) {
         if (view == startButton) {
+            //if the game is over, we must start new game
+            if(pong.isGameOver()){
+                pong.startNewGame();
+                return;
+            }
+
             findSpeeds();
             startButton.setText("STOP!"); //changes text on button
-            pong.startGame(minSpeed, maxSpeed);
+            pong.startOrResetBall(minSpeed, maxSpeed);
         }
         else if (view == addBallButton) {
             findSpeeds();
             pong.addBall(minSpeed, maxSpeed);
         }
-        else if(view == closeMessageButton){
-            gameOver.setVisibility(View.INVISIBLE);
-        }
     }
 
+    /**
+     * sets min and max speed range
+     * based on reading from the radio group
+     */
     public void findSpeeds () {
         int checkedID = speedRadioGroup.getCheckedRadioButtonId();
 
@@ -128,10 +126,17 @@ public class Controls implements View.OnClickListener, SeekBar.OnSeekBarChangeLi
     }
 
     /**
-     * enables popup message if no more lives for player to play
+     * enables changes button to say new game
      */
-    public void gameOver (){
-        gameOver.setVisibility(View.VISIBLE);
+    public void gameOver(){
+        startButton.setText("New Game");
+    }
+
+    /**
+     * indicates that pong game has begun
+     */
+    public void gameBegin(){
+        ballRestarted();
     }
 
     /**
@@ -157,9 +162,7 @@ public class Controls implements View.OnClickListener, SeekBar.OnSeekBarChangeLi
 
     //unused methods
     @Override
-    public void onStartTrackingTouch(SeekBar seekBar){
-        gameOver();
-    }
+    public void onStartTrackingTouch(SeekBar seekBar){}
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {}
 }

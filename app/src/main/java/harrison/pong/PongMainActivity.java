@@ -28,6 +28,17 @@ import android.widget.SeekBar;
  * ball either goes out of bounds or player presses "STOP!" button.
  *
  * 3B Update:
+ * An arbitrary number of balls can be in play at once.
+ * When the ball is in play, if the user hits "BALL++", a new ball
+ * will shoot out of their paddle.
+ * Player only has three lives. If the player loses all balls, a life is lost.
+ * Added brick breaker. Many bricks appear on screen and either take one, two,
+ * or three hits of the ball to break. When a brick is broken, the score is incimented.
+ * When a life is lost, so is the score.
+ * When all lives are lost, or all bricks are broken, a game over message pops up.
+ * Final score is calculated by current score (bricks consecutively broken) times
+ * lives remaining.
+ * Game can then be restarted with the "New Game" button.
  *
  * Instructions:
  * Landscape orientation
@@ -63,12 +74,9 @@ public class PongMainActivity extends AppCompatActivity {
                 (SeekBar)findViewById(R.id.seekBarPaddleSize);
         RadioGroup ballSpeedRadio=
                 (RadioGroup)findViewById(R.id.radioGroupSpeed);
-        LinearLayout gameOver =
-                (LinearLayout)findViewById(R.id.layoutGameOverMessage);
-        Button closeMessageButton= (Button)findViewById(R.id.buttonCloseMessage);
 
         Controls control =
                 new Controls(pong,startButton,addBallButton,paddleSizeBar,
-                        ballSpeedRadio, gameOver,closeMessageButton);
+                        ballSpeedRadio);
     }
 }

@@ -55,7 +55,9 @@ public class Brick extends Wall {
         c.drawRect(left,top,right,bottom,outlinePaint);
     }
 
-
+    /**
+     * set up the paint to outline this brick
+     */
     private void initBrickOutlinePaint () {
         outlinePaint.setColor(0xff000000); //black outline of each brick
         outlinePaint.setStrokeWidth(10.0f);
